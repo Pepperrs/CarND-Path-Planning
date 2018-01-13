@@ -38,6 +38,8 @@ double distance(double x1, double y1, double x2, double y2)
 {
 	return sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
 }
+
+
 int ClosestWaypoint(double x, double y, const vector<double> &maps_x, const vector<double> &maps_y)
 {
 
@@ -85,6 +87,7 @@ int NextWaypoint(double x, double y, double theta, const vector<double> &maps_x,
 
   return closestWaypoint;
 }
+
 
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
 vector<double> getFrenet(double x, double y, double theta, const vector<double> &maps_x, const vector<double> &maps_y)
@@ -244,6 +247,20 @@ int main() {
 
 
           	// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
+
+
+            double dist_inc = 0.6;
+            for(int i = 0; i < 50; i++)
+            {
+                double next_s = car_s + (i+1) * dist_inc;
+                double next_d = 6;
+                vector<double> xy = getXY(next_s, next_d, map_waypoints_s, map_waypoints_x, map_waypoints_y);
+
+                next_x_vals.push_back(xy[0]);
+                next_y_vals.push_back(xy[1]);
+            }
+
+
           	msgJson["next_x"] = next_x_vals;
           	msgJson["next_y"] = next_y_vals;
 
