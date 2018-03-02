@@ -369,6 +369,7 @@ int main() {
                             double ref_yaw = deg2rad(car_yaw);
 
 
+                            // add waypoints to the list, but only if there are alreay some.
                             if (prev_size > 1) {
                                 ref_x = previous_path_x[prev_size - 1];
                                 ref_y = previous_path_y[prev_size - 1];
@@ -382,15 +383,12 @@ int main() {
                                 ptsy.push_back(ref_y_prev);
                             }
 
-                            //First reference points are the current location of the car
 
-
+                            // add current location to the waypoints
                             ptsx.push_back(ref_x);
                             ptsy.push_back(ref_y);
-                            //Next generate some waypoints far up ahead using the Frenet coordinates
-                            //Spacing used here: 30 meters apart
-                            //distance between waypoints variable depending on ego car current velocity
 
+                            // generate future waypoints
                             vector<double> next_waypoint0 = getXY(car_s + 30, (2 + my_lane * 4), map_waypoints_s,
                                                                   map_waypoints_x, map_waypoints_y);
                             vector<double> next_waypoint1 = getXY(car_s + 60, (2 + my_lane * 4), map_waypoints_s,
