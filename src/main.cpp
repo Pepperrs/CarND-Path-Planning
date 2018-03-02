@@ -210,7 +210,7 @@ int main() {
     int lane = 1;
 
     // Have a reference velocity to target
-    double ref_vel = 0; //mph set to 0 to start at velocity 0
+    double ref_vel = 50; //mph set to 0 to start at velocity 0
 
 
     h.onMessage([&ref_vel, &lane, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
@@ -261,7 +261,7 @@ int main() {
                     }
 
                     bool too_close = false;
-                    double match_speed = 0;
+                   // double match_speed = 0;
 
 
 
@@ -278,42 +278,61 @@ int main() {
                     double ref_y = car_y;
                     double ref_yaw = deg2rad(car_yaw);
 
-                    // if previous size is almost empty, use the car as starting reference
-                    if (prev_size < 2)
+//                    // if previous size is almost empty, use the car as starting reference
+//                    if (prev_size < 2)
+//                    {
+//                        // use two points that make the path tangent to the car
+//                        double prev_car_x = car_x - cos(car_yaw);
+//                        double prev_car_y = car_y - sin(car_yaw);
+//
+//                        ptsx.push_back(prev_car_x);
+//                        ptsx.push_back(car_x);
+//
+//                        ptsy.push_back(prev_car_y);
+//                        ptsy.push_back(car_y);
+//
+//                    }
+//
+//                        //use the previous path's end point as starting reference
+//                    else
+//                    {
+//                        // Redefine reference state as previous path end point
+//                        ref_x = previous_path_x[prev_size-1];
+//                        ref_y = previous_path_y[prev_size-1];
+//
+//                        double ref_prev_x = previous_path_x[prev_size-2];
+//                        double ref_prev_y = previous_path_y[prev_size-2];
+//                        ref_yaw = atan2(ref_y-ref_prev_y,ref_x-ref_prev_x);
+//
+//                        // Use two points that make the path tangent to the previous paths end point
+//                        ptsx.push_back(ref_prev_x);
+//                        ptsx.push_back(ref_x);
+//
+//                        ptsy.push_back(ref_prev_y);
+//                        ptsy.push_back(ref_y);
+//                    }
+
+                    if(prev_size > 1)
                     {
-                        // use two points that make the path tangent to the car
-                        double prev_car_x = car_x - cos(car_yaw);
-                        double prev_car_y = car_y - sin(car_yaw);
-
-                        ptsx.push_back(prev_car_x);
-                        ptsx.push_back(car_x);
-
-                        ptsy.push_back(prev_car_y);
-                        ptsy.push_back(car_y);
-
-                    }
-
-                        //use the previous path's end point as starting reference
-                    else
-                    {
-                        // Redefine reference state as previous path end point
                         ref_x = previous_path_x[prev_size-1];
                         ref_y = previous_path_y[prev_size-1];
 
-                        double ref_prev_x = previous_path_x[prev_size-2];
-                        double ref_prev_y = previous_path_y[prev_size-2];
-                        ref_yaw = atan2(ref_y-ref_prev_y,ref_x-ref_prev_x);
+                        double ref_x_prev = previous_path_x[prev_size-2];
+                        double ref_y_prev = previous_path_y[prev_size-2];
 
-                        // Use two points that make the path tangent to the previous paths end point
-                        ptsx.push_back(ref_prev_x);
-                        ptsx.push_back(ref_x);
+                        ref_yaw = atan2(ref_y - ref_y_prev, ref_x - ref_x_prev);
 
-                        ptsy.push_back(ref_prev_y);
-                        ptsy.push_back(ref_y);
+                        ptsx.push_back(ref_x_prev);
+                        ptsy.push_back(ref_y_prev);
                     }
 
+                    //First reference points are the current location of the car
+
+
+                    ptsx.push_back(ref_x);
+                    ptsy.push_back(ref_y);
                     //Next generate some waypoints far up ahead using the Frenet coordinates
-                    //Spacing used here: 25 meters apart
+                    //Spacing used here: 30 meters apart
                     //distance between waypoints variable depending on ego car current velocity
 
                     vector<double> next_waypoint0 = getXY(car_s+30, (2+lane*4), map_waypoints_s, map_waypoints_x, map_waypoints_y);
@@ -344,14 +363,21 @@ int main() {
                     //create a spline
                     tk::spline s;
 
+                    for (auto i = ptsx.begin(); i != ptsx.end(); ++i)
+                        std::cout << *i << ' ';
+                    cout << endl;
+                    for (auto i = ptsx.begin(); i != ptsx.end(); ++i)
+                        std::cout << *i << ' ';
+
                     //set (x,y) points to the spline
                     s.set_points(ptsx, ptsy);
 
+                    cout << "ran once!";
 
                     vector<double> next_x_vals;
                     vector<double> next_y_vals;
 
-                    //start witl all of the previous path points from the last time
+                    //start with all of the previous path points from the last time
                     for(int i=0; i< previous_path_x.size(); i++){
                         next_x_vals.push_back(previous_path_x[i]);
                         next_y_vals.push_back(previous_path_y[i]);
