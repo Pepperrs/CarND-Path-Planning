@@ -1,16 +1,15 @@
 # CarND-Path-Planning-Project
-Self-Driving Car Engineer Nanodegree Program
-   
-### Simulator.
-You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases).
-
-### Goals
-In this project your goal is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. You will be provided the car's localization and sensor fusion data, there is also a sparse map list of waypoints around the highway. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the 6946m highway. Since the car is trying to go 50 MPH, it should take a little over 5 minutes to complete 1 loop. Also the car should not experience total acceleration over 10 m/s^2 and jerk that is greater than 10 m/s^3.
-
-#### The map of the highway is in data/highway_map.txt
-Each waypoint in the list contains  [x,y,s,dx,dy] values. x and y are the waypoint's map coordinate position, the s value is the distance along the road to get to that waypoint in meters, the dx and dy values define the unit normal vector pointing outward of the highway loop.
-
-The highway's waypoints loop around so the frenet s value, distance along the road, goes from 0 to 6945.554.
+This project implements a path planner for highway driving. It is also known as the worst driving commuter ever. The planner is written in C plus plus and builds upon a simulator built with Unity by Udacity. In this write-up, I will talk about some of the features of the planner, namely trajectory generation for lane keeping, lane change decision making to overtake slower vehicles, and speed adjustments to prevent tailgating.
+## Lane keeping
+The simulator provides a set of general waypoints across a round track of 6.5 to 7 km. The path planner generates a spline which connects these waypoints to form a drivable trajectory. The planner tries to calculate fifty points into the future of the vehicle; it does however only add to the already calculated but not driven waypoints.
+## Slower cars
+The ego vehicle starts in the middle lane with a speed of zero. It increases its speed steadily unless it achieves its target speed of 49.5 miles per hour, or unless it approaches a slower vehicle. In this case, it would check whether the adjacent lanes are free and prepare a lane change to be able to drive at its desired speed.
+## Lane change heuristic
+When the vehicle has decided to perform a lane change, it checks its adjacent lane if the lane is currently occupied. If it is in the middle lane, it first checks the left lane, but if that is occupied it also checks the right lane. If no lane is currently free, the vehicle will reduce its speed until the slow car is either too far away, or until a neighbor lane becomes unoccupied and the vehicle can change lanes to overtake the slow vehicle. As soon as there is no slow vehicle in front of the ego vehicle, it will increase its speed again to achieve its desired speed of 49.5 mph.
+## Trajectory generation
+The spline is then used to generate future x and y coordinates depending on the required lane and the currently desired speed of the vehicle. The coordinates are then returned to the simulator, which employs them to show the vehicles performance.
+## Future Work
+There are many possible improvements that could be made to the path planner. The one I have been heard from friends and family the most were to make the vehicle drive after German law, which prohibits the vehicle to overtake on the right side of another vehicle. Another possible improvement would be to change the lane change heuristic to something smarter, like a cost function or an improved state machine. At the moment whenever a slow vehicle is in front of the ego vehicle, it reduces its speed to a much lower value than the slow vehicle. This causes the ego vehicle to „jojo“ behind the slow vehicle. It would be better if it would stay close to the slow car, matching the speed and preparing an overtake maneuver, or deciding not to overtake because there may be a slower vehicle in the other lane.
 
 ## Basic Build Instructions
 
